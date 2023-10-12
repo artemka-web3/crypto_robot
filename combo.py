@@ -51,6 +51,23 @@ def calculate_stop_loss(data, atr_period, atr_multiplier):
     stop_loss_price = data['close'].iloc[-1] - (atr_multiplier * last_atr)
     return stop_loss_price
 
+def calculate_take_profit_levels(historical_data, num_levels=4, buy_signal=True):
+    # Определите цену входа, например, последнюю цену закрытия
+    entry_price = historical_data['close'].iloc[-1]
+    # Определите столбец, по которому будет строиться расчет (close или low для продажи, high или close для покупки)
+    column_to_use = 'close' if buy_signal else 'low'
+    # Сортируем исторические данные по столбцу для анализа
+    sorted_data = historical_data.sort_values(by=column_to_use, ascending=buy_signal)
+    # Рассчитываем квантили (квартили) на основе отсортированных данных
+    quantiles = []
+    for i in range(1, num_levels + 1):
+        quantile_value = sorted_data[column_to_use].quantile(i / (num_levels + 1))
+        quantiles.append(quantile_value)
+    # Рассчитываем уровни тейк-профита
+    take_profit_levels = [entry_price + (quantile - entry_price) for quantile in quantiles]
+    return take_profit_levels
+
+
 def get_historical_data(symbol, timeframe, limit):
     ohlcv = bitget.fetch_ohlcv(symbol, timeframe, limit=limit)
     df = pd.DataFrame(ohlcv, columns=['timestamp', 'open', 'high', 'low', 'close', 'volume'])
@@ -77,8 +94,11 @@ def combo_strategy_full(symbol):
             if last_signals[symbol] != "buy" and entry_price > 1:
                 predicted_values = predict_price(historical_data, symbol)
                 stop_loss_price = choose_stop_loss_pivot(historical_data, 'LONG')
-                take_profit_price = predicted_values['yhat_upper'].iloc[-1]
-                long_fixations = fix_position_long(entry_price, take_profit_price)
+                take_profit_points = calculate_take_profit_levels(historical_data=historical_data, buy_signal=True)
+                #take_profit_price = predicted_values['yhat_upper'].iloc[-1]
+                take_profit_price = take_profit_points[3]
+                #long_fixations = fix_position_long(entry_price, take_profit_price)
+                long_fixations = [take_profit_points[0], take_profit_points[1], take_profit_points[2]]
                 take_procent_difference = ((take_profit_price - entry_price) / entry_price) * 100
                 stop_procent_difference = ((entry_price - stop_loss_price) / stop_loss_price) * 100
                 print(last_signals[symbol])
@@ -110,8 +130,11 @@ def combo_strategy_full(symbol):
                 stop_loss_price = choose_stop_loss_pivot(historical_data, 'SHORT')
                 #stop_loss_price = calculate_stop_loss(historical_data, atr_period, atr_multiplier)
                 # if stop_loss_price < entry_price:
-                take_profit_price = predicted_values['yhat_lower'].iloc[-1]
-                short_fixations = fix_position_short(entry_price, take_profit_price)
+                #take_profit_price = predicted_values['yhat_lower'].iloc[-1]
+                take_profit_points = calculate_take_profit_levels(historical_data, buy_signal=False)
+                take_profit_price = take_profit_points[3]
+                #short_fixations = fix_position_short(entry_price, take_profit_price)
+                short_fixations = [take_profit_points[0], take_profit_points[1], take_profit_points[2]]
                 take_procent_difference = ((entry_price - take_profit_price) / take_profit_price) * 100
                 stop_procent_difference = ((stop_loss_price - entry_price) / entry_price) * 100
 

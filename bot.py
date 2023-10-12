@@ -82,7 +82,6 @@ async def send():
                         f"<b>🎯ЦЕЛЬ 1:</b>\n${item['fixations'][0]}\n\n"+
                         f"<b>🎯ЦЕЛЬ 2:</b>\n${item['fixations'][1]}\n\n"+
                         f"<b>🎯ЦЕЛЬ 3:</b>\n${item['fixations'][2]}\n\n"+
-                        f"<b>🎯ЦЕЛЬ 4:</b>\n${item['fixations'][3]}\n\n"+
                         f"<b>🕒ВРЕМЯ СИГНАЛА:</b>\n{item['time']}\n_____\n\n"+
 
                         f"<b>ПОТЕНЦИАЛЬНАЯ ПРИБЫЛЬ:</b>\n{round(item['take_perc'], 4)}%\n\n"+
