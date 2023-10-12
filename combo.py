@@ -113,8 +113,8 @@ def combo_strategy_full(symbol):
             if last_signals[symbol] != "buy" and entry_price > 1:
                 predicted_values = predict_price(historical_data, symbol)
                 stop_loss_price = choose_stop_loss_pivot(historical_data, 'LONG')
-                take_profit_points = forecast_take_profit_price_long(historical_data, 4)
-                take_profit_points = [take_profit_points[0], take_profit_points[1], take_profit_points[2], take_profit_points[3]]
+                take_profit_points = forecast_take_profit_price_long(historical_data, 150)
+                take_profit_points = [take_profit_points[146], take_profit_points[147], take_profit_points[148], take_profit_points[149]]
                 take_profit_points.sort()
                 #take_profit_price = predicted_values['yhat_upper'].iloc[-1]
                 take_profit_price = take_profit_points[3]
@@ -125,7 +125,7 @@ def combo_strategy_full(symbol):
                 print(last_signals[symbol])
                 print('', entry_price > stop_loss_price and entry_price < take_profit_price)
 
-                if entry_price > stop_loss_price and entry_price < take_profit_price:
+                if entry_price > stop_loss_price and entry_price < take_profit_price and take_procent_difference > stop_procent_difference:
                     #обновление направления
                     last_signals[symbol] = 'buy'
                     last_signal_dir_json.write_last_signal_dir(last_signals)
@@ -152,8 +152,8 @@ def combo_strategy_full(symbol):
                 #stop_loss_price = calculate_stop_loss(historical_data, atr_period, atr_multiplier)
                 # if stop_loss_price < entry_price:
                 #take_profit_price = predicted_values['yhat_lower'].iloc[-1]
-                take_profit_points = forecast_take_profit_price_short(historical_data, 4)
-                take_profit_points = [take_profit_points[0], take_profit_points[1], take_profit_points[2], take_profit_points[3]]
+                take_profit_points = forecast_take_profit_price_short(historical_data, 150)
+                take_profit_points = [take_profit_points[146], take_profit_points[147], take_profit_points[148], take_profit_points[149]]
                 take_profit_points.sort()
                 take_profit_price = take_profit_points[0]
                 #short_fixations = fix_position_short(entry_price, take_profit_price)
@@ -161,7 +161,7 @@ def combo_strategy_full(symbol):
                 take_procent_difference = ((entry_price - take_profit_price) / take_profit_price) * 100
                 stop_procent_difference = ((stop_loss_price - entry_price) / entry_price) * 100
 
-                if entry_price < stop_loss_price and entry_price > take_profit_price:
+                if entry_price < stop_loss_price and entry_price > take_profit_price and take_procent_difference > stop_procent_difference:
                     #обновление направления
                     last_signals[symbol] = 'sell'
                     last_signal_dir_json.write_last_signal_dir(last_signals)
