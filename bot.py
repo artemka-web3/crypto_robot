@@ -128,7 +128,7 @@ async def update_analytics():
 def schedule_tasks():
     aioschedule.every(10).seconds.do(send)
     aioschedule.every(60).minutes.do(clear_last_signal)
-
+    aioschedule.every(10).minutes.do(update_analytics)
 
 async def main():
     while True:
