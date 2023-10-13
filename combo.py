@@ -4,21 +4,10 @@ from fix_position import *
 from statsmodels.tsa.arima.model import ARIMA
 
 import talib
-import ccxt
 import time
 import pandas as pd
 import last_signal_dir_json
-
-bollinger_period = 14
-stoch_k_period = 14
-stoch_d_period = 3
-adx_period = 14
-adx_threshold = 25
-
-atr_period = 200  # Период для расчета ATR (можете настроить по своему усмотрению)
-atr_multiplier = 2.0 
-
-bitget = ccxt.binance()
+import ccxt
 
 
 
@@ -29,7 +18,7 @@ def predict_price(historical_data, symbol):
     model.fit(df_prophet)
     future = model.make_future_dataframe(periods=240, freq='min')
     forecast = model.predict(future)
-    forecast = forecast[['ds', 'yhat', 'yhat_lower', 'yhat_upper']].tail(1)
+    forecast = forecast[['ds', 'yhat', 'yhat_lower', 'yhat_upper']].tail(100)
     return forecast
 
 def forecast_stop_loss(data, direction, num_values=3):
@@ -87,7 +76,7 @@ def forecast_take_profit_price_short(historical_data, num_levels=3):
 
     return take_profit_prices
 
-def get_historical_data(symbol, timeframe, limit):
+def get_historical_data(symbol, timeframe, limit, bitget):
     ohlcv = bitget.fetch_ohlcv(symbol, timeframe, limit=limit)
     df = pd.DataFrame(ohlcv, columns=['timestamp', 'open', 'high', 'low', 'close', 'volume'])
     df['timestamp'] = pd.to_datetime(df['timestamp'], unit='ms')
@@ -95,17 +84,22 @@ def get_historical_data(symbol, timeframe, limit):
     return df
 
 def calculate_indicators(data):
+    bollinger_period = 14
+    stoch_k_period = 14
+    stoch_d_period = 3
+    adx_period = 14
+
     bollinger_upper, bollinger_middle, bollinger_lower = talib.BBANDS(data['close'], timeperiod=bollinger_period)
     stoch_k, stoch_d = talib.STOCH(data['high'], data['low'], data['close'], fastk_period=stoch_k_period, slowk_period=stoch_d_period)
     adx = talib.ADX(data['high'], data['low'], data['close'], timeperiod=adx_period)
     return bollinger_upper, bollinger_middle, bollinger_lower, stoch_k, stoch_d, adx
 
 # Основная стратегия
-def combo_strategy_full(symbol):
+def combo_strategy_full(symbol, bitget):
+    adx_threshold = 25
     while True:
-        historical_data = get_historical_data(symbol, '4h', 200)
+        historical_data = get_historical_data(symbol, '4h', 200, bitget)
         bollinger_upper, bollinger_middle, bollinger_lower, stoch_k, stoch_d, adx = calculate_indicators(historical_data)
-
         entry_price = historical_data['close'].iloc[-1]
         data = read_json()
         last_signals = last_signal_dir_json.read_last_signal_dir()
@@ -113,17 +107,17 @@ def combo_strategy_full(symbol):
             if last_signals[symbol] != "buy" and entry_price > 1:
                 predicted_values = predict_price(historical_data, symbol)
                 stop_loss_price = choose_stop_loss_pivot(historical_data, 'LONG')
-                take_profit_points = forecast_take_profit_price_long(historical_data, 150)
-                take_profit_points = [take_profit_points[146], take_profit_points[147], take_profit_points[148], take_profit_points[149]]
+
+                take_profit_points =  predict_price(historical_data, symbol)
+                take_profit_points = [take_profit_points['yhat_upper'].iloc[-1], take_profit_points['yhat_upper'].iloc[-30], take_profit_points['yhat_upper'].iloc[-60], take_profit_points['yhat_upper'].iloc[-90]]
                 take_profit_points.sort()
-                #take_profit_price = predicted_values['yhat_upper'].iloc[-1]
+                print(take_profit_points)
                 take_profit_price = take_profit_points[3]
-                #long_fixations = fix_position_long(entry_price, take_profit_price)
                 long_fixations = [take_profit_points[0], take_profit_points[1], take_profit_points[2]]
                 take_procent_difference = ((take_profit_price - entry_price) / entry_price) * 100
                 stop_procent_difference = ((entry_price - stop_loss_price) / stop_loss_price) * 100
-                print(last_signals[symbol])
-                print('', entry_price > stop_loss_price and entry_price < take_profit_price)
+                #print(last_signals[symbol])
+                #print('', entry_price > stop_loss_price and entry_price < take_profit_price)
 
                 if entry_price > stop_loss_price and entry_price < take_profit_price and take_procent_difference > stop_procent_difference:
                     #обновление направления
@@ -144,18 +138,18 @@ def combo_strategy_full(symbol):
                     }
                     data.append(new_signal)
                     write_json(data)
-        elif stoch_k.iloc[-1] < stoch_d.iloc[-1] or bollinger_upper.iloc[-1] < historical_data['close'].iloc[-1]:
+        elif stoch_k.iloc[-1] < stoch_d.iloc[-1] or bollinger_upper.iloc[-1] < historical_data['close'].iloc[-89]:
             if last_signals[symbol] != "sell" and entry_price > 1:
 
                 predicted_values = predict_price(historical_data, symbol)
                 stop_loss_price = choose_stop_loss_pivot(historical_data, 'SHORT')
-                #stop_loss_price = calculate_stop_loss(historical_data, atr_period, atr_multiplier)
-                # if stop_loss_price < entry_price:
-                #take_profit_price = predicted_values['yhat_lower'].iloc[-1]
-                take_profit_points = forecast_take_profit_price_short(historical_data, 150)
-                take_profit_points = [take_profit_points[146], take_profit_points[147], take_profit_points[148], take_profit_points[149]]
+
+                take_profit_points =  predict_price(historical_data, symbol)
+                take_profit_points = [take_profit_points['yhat_lower'].iloc[-1], take_profit_points['yhat_lower'].iloc[-30], take_profit_points['yhat_lower'].iloc[-60], take_profit_points['yhat_lower'].iloc[-89]]
                 take_profit_points.sort()
+                print(take_profit_points)
                 take_profit_price = take_profit_points[0]
+
                 #short_fixations = fix_position_short(entry_price, take_profit_price)
                 short_fixations = [take_profit_points[3], take_profit_points[2], take_profit_points[1]]
                 take_procent_difference = ((entry_price - take_profit_price) / take_profit_price) * 100

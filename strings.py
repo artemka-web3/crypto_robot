@@ -46,3 +46,30 @@ stop_loss_price = predicted_values['yhat_upper'].iloc[-1]
 stop_loss_forecasts = forecast_stop_loss(historical_data, "SHORT", num_values=3) 
 stop_losses = [stop_loss_forecasts[0], stop_loss_forecasts[1], stop_loss_forecasts[2]]
 """
+
+
+
+"""
+                # take_profit_points = forecast_take_profit_price_long(historical_data, 150)
+                # take_profit_points = [take_profit_points[146], take_profit_points[147], take_profit_points[148], take_profit_points[149]]
+                # take_profit_points.sort()
+                #take_profit_price = predicted_values['yhat_upper'].iloc[-1]
+                # take_profit_price = take_profit_points[3]
+                #long_fixations = fix_position_long(entry_price, take_profit_price)
+
+
+
+
+
+
+
+                                #stop_loss_price = calculate_stop_loss(historical_data, atr_period, atr_multiplier)
+                # if stop_loss_price < entry_price:
+                #take_profit_price = predicted_values['yhat_lower'].iloc[-1]
+                # take_profit_points = forecast_take_profit_price_short(historical_data, 150)
+                # take_profit_points = [take_profit_points[146], take_profit_points[147], take_profit_points[148], take_profit_points[149]]
+                # take_profit_points.sort()
+                # take_profit_price = take_profit_points[0]
+
+
+"""

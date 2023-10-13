@@ -2,19 +2,18 @@ import pygsheets
 import pytz
 import datetime
 
+gc = pygsheets.authorize(service_account_file='sheets_key.json')
+ws = gc.open('Крипта стата').worksheet()
+
 async def add_item(ticker, price, take_profit, stop_loss, time, take_perc, stop_perc):
-    gc = pygsheets.authorize(service_account_file='sheets_key.json')
-    ws = gc.open('Крипта стата').worksheet()
     tickers = ws.get_col(1)
     for n,i in enumerate(tickers):
         if i == '':
             tickers = tickers[:n]
             break
-    ws.update_row(len(tickers), list(map(str, [ticker, price, take_profit, stop_loss, time, take_perc, stop_perc])))
+    ws.update_row(len(tickers)+1, list(map(str, [ticker, price, take_profit, stop_loss, time, take_perc, stop_perc])))
 
 async def update_item(ticker, time, result):
-    gc = pygsheets.authorize(service_account_file='sheets_key.json')
-    ws = gc.open('Крипта стата').worksheet()
     tickers = ws.get_col(1)
     for n,i in enumerate(tickers):
         if i == ticker:
@@ -25,4 +24,4 @@ async def update_item(ticker, time, result):
                 break
     time_goal = datetime.datetime.now(pytz.timezone('Europe/Moscow'))
     duration = time_goal - datetime.datetime.strptime(time, "%Y-%m-%d %H:%M")
-    ws.update_row(n, list(map(str, [ticker, row[1], row[2], row[3], time, row[5], row[6], result, time_goal, duration])))
+    ws.update_row(n+1, list(map(str, [ticker, row[1], row[2], row[3], time, row[5], row[6], result, time_goal, duration])))

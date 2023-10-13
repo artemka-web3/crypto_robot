@@ -8,6 +8,7 @@ from combo import *
 from config import *
 import requests
 
+bitget = ccxt.binance()
 
 # warnings.filterwarnings("ignore", category=FutureWarning)
 
@@ -30,7 +31,7 @@ threads = []
 def run_crypto_tracker(symbols):
     global threads
     for sym in symbols:
-        thread = threading.Thread(target=combo_strategy_full, args=(sym,))
+        thread = threading.Thread(target=combo_strategy_full, args=(sym, bitget))
         threads.append(thread)
         thread.start()
         time.sleep(1)
