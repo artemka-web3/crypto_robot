@@ -1,18 +1,3 @@
-def fix_position_long(price, take_profit):
-    fix_1 = price + ((take_profit - price) * 0.25)
-    fix_2 = fix_1 + ((take_profit - fix_1) * 0.25)
-    fix_3 = fix_2 + ((take_profit - fix_1) * 0.25)
-    fix_4 = fix_3 + ((take_profit - fix_1) * 0.25)
-    return [fix_1, fix_2, fix_3, fix_4]
-
-def fix_position_short(price, take_profit):
-    fix_1 = price - ((price - take_profit) * 0.25)
-    fix_2 = fix_1 - ((fix_1 - take_profit) * 0.25)
-    fix_3 = fix_2 - ((fix_2 - take_profit) * 0.25)
-    fix_4 = fix_3 - ((fix_3 - take_profit) * 0.25)
-    return [fix_1, fix_2, fix_3, fix_4]
-
-
 def calculate_pivot_points(data, pivot_period=14):
     # Вычислить уровни Pivot Points
     close_prices = data['close']

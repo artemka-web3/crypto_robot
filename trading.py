@@ -10,21 +10,6 @@ import requests
 
 bitget = ccxt.binance()
 
-# warnings.filterwarnings("ignore", category=FutureWarning)
-
-# symbols = [
-# "BTC/USDT",
-# "ETH/USDT",
-# "LTC/USDT",
-# "TRX/USDT",
-# "BNB/USDT",
-# "LINK/USDT",
-# "ADA/USDT",
-# "DOT/USDT",
-# "XRP/USDT",
-# "CRV/USDT" 
-# ]
-
 threads = []
 
 
@@ -51,6 +36,7 @@ if response.status_code == 200:
         сounter += 1
 else:
     print('Failed to retrieve data from Binance API')
+    
 fullfill(symbols)
 run_crypto_tracker(symbols)
 for thread in threads:

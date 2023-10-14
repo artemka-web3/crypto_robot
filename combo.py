@@ -18,63 +18,8 @@ def predict_price(historical_data, symbol):
     model.fit(df_prophet)
     future = model.make_future_dataframe(periods=240, freq='min')
     forecast = model.predict(future)
-    forecast = forecast[['ds', 'yhat', 'yhat_lower', 'yhat_upper']].tail(100)
+    forecast = forecast[['ds', 'yhat', 'yhat_lower', 'yhat_upper']].tail(1)
     return forecast
-
-def forecast_stop_loss(data, direction, num_values=3):
-    close_prices = data['close'].values
-    if direction == "LONG":
-        # Прогноз для LONG
-        model = ARIMA(close_prices, order=(5,1,0))  # Параметры модели могут варьироваться
-    else:
-        # Прогноз для SHORT
-        model = ARIMA(close_prices, order=(5,1,0))  # Параметры модели могут варьироваться
-
-    model_fit = model.fit()
-    forecasted_values = model_fit.forecast(steps=num_values)
-    return forecasted_values
-
-def calculate_stop_loss(data, atr_period, atr_multiplier):
-    atr = talib.ATR(data['high'], data['low'], data['close'], timeperiod=atr_period)
-    last_atr = atr.iloc[-1]
-    stop_loss_price = data['close'].iloc[-1] - (atr_multiplier * last_atr)
-    return stop_loss_price
-
-def forecast_take_profit_price_long(historical_data, num_levels=3):
-    # Определите цену входа (цену закрытия), например
-    entry_price = historical_data['close'].iloc[-1]
-
-    # Получите колонку с высокими ценами
-    high_prices = historical_data['high']
-
-    # Рассчитаем процентное изменение от начальной цены для каждой точки данных
-    price_change_percentage = (high_prices - entry_price) / entry_price
-
-    # Отсортируем точки данных по процентному изменению в порядке убывания
-    sorted_data = historical_data.iloc[price_change_percentage.argsort()[::-1]]
-
-    # Получим наиболее возможные цены для тейк-профита
-    take_profit_prices = sorted_data['high'].head(num_levels)
-
-    return take_profit_prices
-
-def forecast_take_profit_price_short(historical_data, num_levels=3):
-    # Определите цену входа (цену закрытия), например
-    entry_price = historical_data['close'].iloc[-1]
-
-    # Получите колонку с низкими ценами
-    low_prices = historical_data['low']
-
-    # Рассчитаем процентное изменение от начальной цены для каждой точки данных
-    price_change_percentage = (low_prices - entry_price) / entry_price
-
-    # Отсортируем точки данных по процентному изменению в порядке возрастания
-    sorted_data = historical_data.iloc[price_change_percentage.argsort()]
-
-    # Получим наиболее возможные цены для тейк-профита
-    take_profit_prices = sorted_data['low'].head(num_levels)
-
-    return take_profit_prices
 
 def get_historical_data(symbol, timeframe, limit, bitget):
     ohlcv = bitget.fetch_ohlcv(symbol, timeframe, limit=limit)
@@ -105,15 +50,9 @@ def combo_strategy_full(symbol, bitget):
         last_signals = last_signal_dir_json.read_last_signal_dir()
         if stoch_k.iloc[-1] > stoch_d.iloc[-1] and bollinger_lower.iloc[-1] > historical_data['close'].iloc[-1] and adx.iloc[-1] > adx_threshold:
             if last_signals[symbol] != "buy" and entry_price > 1:
-                predicted_values = predict_price(historical_data, symbol)
                 stop_loss_price = choose_stop_loss_pivot(historical_data, 'LONG')
-
                 take_profit_points =  predict_price(historical_data, symbol)
-                take_profit_points = [take_profit_points['yhat_upper'].iloc[-1], take_profit_points['yhat_upper'].iloc[-30], take_profit_points['yhat_upper'].iloc[-60], take_profit_points['yhat_upper'].iloc[-90]]
-                take_profit_points.sort()
-                print(take_profit_points)
-                take_profit_price = take_profit_points[3]
-                long_fixations = [take_profit_points[0], take_profit_points[1], take_profit_points[2]]
+                take_profit_price = take_profit_points['yhat_upper'].iloc[-1]
                 take_procent_difference = ((take_profit_price - entry_price) / entry_price) * 100
                 stop_procent_difference = ((entry_price - stop_loss_price) / stop_loss_price) * 100
                 #print(last_signals[symbol])
@@ -131,7 +70,6 @@ def combo_strategy_full(symbol, bitget):
                         "signal_type": "🟢 LONG",
                         "ticker": symbol, 
                         "time": datetime.now().strftime("%Y-%m-%d %H:%M"),
-                        'fixations': long_fixations,
                         'take_perc': take_procent_difference,
                         'stop_perc': stop_procent_difference
 
@@ -141,11 +79,10 @@ def combo_strategy_full(symbol, bitget):
         elif stoch_k.iloc[-1] < stoch_d.iloc[-1] or bollinger_upper.iloc[-1] < historical_data['close'].iloc[-89]:
             if last_signals[symbol] != "sell" and entry_price > 1:
 
-                predicted_values = predict_price(historical_data, symbol)
                 stop_loss_price = choose_stop_loss_pivot(historical_data, 'SHORT')
 
                 take_profit_points =  predict_price(historical_data, symbol)
-                take_profit_points = [take_profit_points['yhat_lower'].iloc[-1], take_profit_points['yhat_lower'].iloc[-30], take_profit_points['yhat_lower'].iloc[-60], take_profit_points['yhat_lower'].iloc[-89]]
+                take_profit_price = take_profit_points['yhat_lower'].iloc[-1]
                 take_profit_points.sort()
                 print(take_profit_points)
                 take_profit_price = take_profit_points[0]

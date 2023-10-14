@@ -16,8 +16,6 @@ bot = Bot(token=BOT_API_TOKEN)
 dp = Dispatcher(bot)
 
 
-
-
 async def get_users():
     async with aiofiles.open("users.json", mode='r', encoding="utf-8") as file:
         json_data = await file.read()
@@ -28,7 +26,6 @@ async def add_users(data):
     json_data = json.dumps(data, ensure_ascii=False)
     async with aiofiles.open('users.json', mode='w', encoding="utf-8") as file:
         await file.write(json_data)
-
 
 
 
