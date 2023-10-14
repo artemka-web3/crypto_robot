@@ -2,7 +2,7 @@ import json
 from datetime import datetime
 import aiofiles
 
-async def read_json():
+async def read_signals():
     try:
         async with aiofiles.open("signals.json", mode='r', encoding="utf-8") as file:
             data = json.loads(await file.read())
@@ -11,13 +11,13 @@ async def read_json():
         print(f"Error decoding JSON: {err}")
         return []
 
-async def write_json(data):
+async def write_signals(data):
     json_data = json.dumps(data, ensure_ascii=False)
     async with aiofiles.open('signals.json', mode='w', encoding="utf-8") as file:
         await file.write(json_data)
 
-async def clear_json():
-    await write_json([])
+async def clear_signals():
+    await write_signals([])
 
 async def convert_strdate_to_date(strdate):
     date_object = datetime.strptime(strdate, "%Y-%m-%d %H:%M")

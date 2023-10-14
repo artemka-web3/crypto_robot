@@ -2,8 +2,9 @@ from aiogram import Bot, Dispatcher, executor, types, exceptions
 import aioschedule
 import asyncio
 import logging
-
 import requests
+
+from combo import combo_strategy_full, get_historical_data
 from json_utils import *
 
 from config import *
@@ -49,13 +50,10 @@ async def clear_last_signal():
     await fullfill(symbols)
 
 async def send():
-    signals = await read_json()
+    signals = await read_signals()
     users = await get_users()
     if signals:
         for item in signals:
-           # try: await analytics.add_item(ticker=str(item['ticker']), price=str(item['price']), stop_loss=str(item['stop_loss']), take_profit=str(item['take_profit']), time=str(item['time']), 
-           #                               take_perc=str(round(item['take_perc'], 2)), stop_perc=str(round(item['stop_perc'], 2)))
-           # except: logging.critical('Error in analytics')
             for user in users:
                 try:
                     await bot.send_message(
@@ -82,17 +80,34 @@ async def send():
                 except Exception as e:
                     logging.info(f"{item['ticker']}\nОшибка отправки\n", e)
                     continue
-        clear_json()
+        clear_signals()
 
 async def schedule_tasks():
     aioschedule.every(10).seconds.do(send)
     aioschedule.every(60).minutes.do(clear_last_signal)
-    #aioschedule.every(10).minutes.do(update_analytics)
     while True:
         await aioschedule.run_pending()
         await asyncio.sleep(1)
 
 async def on_startup(_):
+    symbols = []
+    endpoint = 'https://fapi.binance.com/fapi/v1/exchangeInfo'
+    headers = {
+        'X-MBX-APIKEY': BINANCE_API_KEY
+    }
+    response = requests.get(endpoint, headers=headers)
+    if response.status_code == 200:
+        data = response.json()
+        сounter = 0
+        for symbol_info in data['symbols']:
+            if 'BUSD' not in symbol_info['symbol']:
+                symbols.append(symbol_info['symbol'])
+            сounter += 1
+    else:
+        print('Failed to retrieve data from Binance API')
+    await fullfill(symbols)
+    for s in symbols:
+        asyncio.create_task(combo_strategy_full(s))
     asyncio.create_task(schedule_tasks())
 
 if __name__ == '__main__':
