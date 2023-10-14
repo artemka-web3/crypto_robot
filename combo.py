@@ -83,12 +83,7 @@ def combo_strategy_full(symbol, bitget):
 
                 take_profit_points =  predict_price(historical_data, symbol)
                 take_profit_price = take_profit_points['yhat_lower'].iloc[-1]
-                take_profit_points.sort()
-                print(take_profit_points)
-                take_profit_price = take_profit_points[0]
 
-                #short_fixations = fix_position_short(entry_price, take_profit_price)
-                short_fixations = [take_profit_points[3], take_profit_points[2], take_profit_points[1]]
                 take_procent_difference = ((entry_price - take_profit_price) / take_profit_price) * 100
                 stop_procent_difference = ((stop_loss_price - entry_price) / entry_price) * 100
 
@@ -104,7 +99,6 @@ def combo_strategy_full(symbol, bitget):
                         "signal_type": "🔴 SHORT",
                         "ticker": symbol, 
                         "time": datetime.now().strftime("%Y-%m-%d %H:%M"),
-                        'fixations': short_fixations,
                         'take_perc': take_procent_difference,
                         'stop_perc': stop_procent_difference
                     }

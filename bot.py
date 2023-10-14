@@ -79,9 +79,6 @@ async def send():
                         f"✅<b>ЦЕНА ВХОДА:</b> ${round(item['price'], 2)}\n\n"+
                         f"💰<b>ТЕЙК-ПРОФИТ:</b>\n${item['take_profit']}\n\n"+
                         f"<b>🛑СТОП-ЛОСС:</b>\n${item['stop_loss']}\n\n"+
-                        f"<b>🎯ЦЕЛЬ 1:</b>\n${item['fixations'][0]}\n\n"+
-                        f"<b>🎯ЦЕЛЬ 2:</b>\n${item['fixations'][1]}\n\n"+
-                        f"<b>🎯ЦЕЛЬ 3:</b>\n${item['fixations'][2]}\n\n"+
                         f"<b>🕒ВРЕМЯ СИГНАЛА:</b>\n{item['time']}\n_____\n\n"+
 
                         f"<b>ПОТЕНЦИАЛЬНАЯ ПРИБЫЛЬ:</b>\n{round(item['take_perc'], 4)}%\n\n"+
