@@ -1,17 +1,15 @@
 import pygsheets
 import pytz
 import datetime
+from config import *
 
-gc = pygsheets.authorize(service_account_file='sheets_key.json')
-ws = gc.open('Крипта стата').worksheet()
-
-async def add_item(ticker, price, take_profit, stop_loss, time, take_perc, stop_perc):
+async def add_item(ticker, price, take_profit, stop_loss, time, take_perc, stop_perc, signal_type):
     tickers = ws.get_col(1)
     for n,i in enumerate(tickers):
         if i == '':
             tickers = tickers[:n]
             break
-    ws.update_row(len(tickers)+1, list(map(str, [ticker, price, take_profit, stop_loss, time, take_perc, stop_perc])))
+    ws.update_row(len(tickers)+1, list(map(str, [ticker, signal_type, price, take_profit, stop_loss, time, take_perc, stop_perc])))
 
 async def update_item(ticker, time, result):
     tickers = ws.get_col(1)

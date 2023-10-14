@@ -8,7 +8,6 @@ from combo import *
 from config import *
 import requests
 
-bitget = ccxt.binance()
 
 threads = []
 
@@ -36,7 +35,7 @@ if response.status_code == 200:
         сounter += 1
 else:
     print('Failed to retrieve data from Binance API')
-    
+
 fullfill(symbols)
 run_crypto_tracker(symbols)
 for thread in threads:

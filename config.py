@@ -1,3 +1,12 @@
+import ccxt
+import  pygsheets
+
+
+gc = pygsheets.authorize(service_account_file='sheets_key.json')
+ws = gc.open('Крипта стата').worksheet()
+
+bitget = ccxt.binance()
+
 BYBIT_API_KEY = "8foHKmewIagRdKwrFu"
 BYBIT_API_SECRET = "jlamiX5GJEzcLjm58Mu6jCp7Tzi1czcmo4yO"
 BYBIT_API_NAME = "crypto_tg"

@@ -9,6 +9,7 @@ import aioschedule
 import asyncio
 import time
 import requests
+import analytics
 
 logging.basicConfig(level=logging.INFO)
 
@@ -68,9 +69,9 @@ async def send():
     users = await get_users()
     if signals:
         for item in signals:
-            # try: await analytics.add_item(ticker=str(item['ticker']), price=str(item['price']), stop_loss=str(item['stop_loss']), take_profit=str(item['take_profit']), time=str(item['time']), 
-            #                               take_perc=str(round(item['take_perc'], 2)), stop_perc=str(round(item['stop_perc'], 2)))
-            # except: logging.critical('Error in analytics')
+            try: await analytics.add_item(ticker=str(item['ticker']), price=str(item['price']), stop_loss=str(item['stop_loss']), take_profit=str(item['take_profit']), time=str(item['time']), 
+                                          take_perc=str(round(item['take_perc'], 2)), stop_perc=str(round(item['stop_perc'], 2)), signal_type=item['signal_type'])
+            except: logging.critical('Error in analytics')
             for user in users:
                 try:
                     await bot.send_message(

@@ -76,7 +76,7 @@ def combo_strategy_full(symbol, bitget):
                     }
                     data.append(new_signal)
                     write_json(data)
-        elif stoch_k.iloc[-1] < stoch_d.iloc[-1] or bollinger_upper.iloc[-1] < historical_data['close'].iloc[-89]:
+        elif stoch_k.iloc[-1] < stoch_d.iloc[-1] or bollinger_upper.iloc[-1] < historical_data['close'].iloc[-1]:
             if last_signals[symbol] != "sell" and entry_price > 1:
 
                 stop_loss_price = choose_stop_loss_pivot(historical_data, 'SHORT')
