@@ -8,6 +8,7 @@ import time
 import pandas as pd
 import last_signal_dir_json
 import ccxt
+from datetime import timedelta
 
 
 
@@ -49,7 +50,7 @@ def combo_strategy_full(symbol, bitget):
         data = read_json()
         last_signals = last_signal_dir_json.read_last_signal_dir()
         if stoch_k.iloc[-1] > stoch_d.iloc[-1] and bollinger_lower.iloc[-1] > historical_data['close'].iloc[-1] and adx.iloc[-1] > adx_threshold:
-            if last_signals[symbol] != "buy" and entry_price > 1:
+            if last_signals[symbol]['last_signal'] != "buy" and entry_price > 1 and datetime.strptime(last_signals[symbol]['last_time'], "%Y-%m-%d %H:%M") < datetime.now() - timedelta(hours=1):
                 stop_loss_price = choose_stop_loss_pivot(historical_data, 'LONG')
                 take_profit_points =  predict_price(historical_data, symbol)
                 take_profit_price = take_profit_points['yhat_upper'].iloc[-1]
@@ -60,7 +61,8 @@ def combo_strategy_full(symbol, bitget):
 
                 if entry_price > stop_loss_price and entry_price < take_profit_price and take_procent_difference > stop_procent_difference:
                     #обновление направления
-                    last_signals[symbol] = 'buy'
+                    last_signals[symbol]['last_signal'] = 'buy'
+                    last_signals[symbol]['last_time'] = datetime.now().strftime('%Y-%m-%d %H:%M')
                     last_signal_dir_json.write_last_signal_dir(last_signals)
                     #обновление направления
                     new_signal = {
@@ -77,7 +79,7 @@ def combo_strategy_full(symbol, bitget):
                     data.append(new_signal)
                     write_json(data)
         elif stoch_k.iloc[-1] < stoch_d.iloc[-1] or bollinger_upper.iloc[-1] < historical_data['close'].iloc[-1]:
-            if last_signals[symbol] != "sell" and entry_price > 1:
+            if last_signals[symbol] != "sell" and entry_price > 1 and datetime.strptime(last_signals[symbol]['last_time'], "%Y-%m-%d %H:%M") < datetime.now() - timedelta(hours=1):
 
                 stop_loss_price = choose_stop_loss_pivot(historical_data, 'SHORT')
 
@@ -89,7 +91,9 @@ def combo_strategy_full(symbol, bitget):
 
                 if entry_price < stop_loss_price and entry_price > take_profit_price and take_procent_difference > stop_procent_difference:
                     #обновление направления
-                    last_signals[symbol] = 'sell'
+                    last_signals[symbol]['signal_type'] = 'sell'
+                    last_signals[symbol]['last_time'] = datetime.now().strftime('%Y-%m-%d %H:%M')
+
                     last_signal_dir_json.write_last_signal_dir(last_signals)
                     #обновление направления
                     new_signal = {

@@ -94,7 +94,7 @@ def set_cell_colors(background_color, text_color, data, row):
         cell.update()
 
 def schedule_tasks():
-    aioschedule.every(10).seconds.do(update_analytics)
+    aioschedule.every(10).minutes.do(update_analytics)
 
 
 async def main():

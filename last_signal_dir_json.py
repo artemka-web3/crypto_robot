@@ -1,5 +1,5 @@
 import json
-from datetime import datetime
+from datetime import datetime, timedelta
 
 
 def read_last_signal_dir():
@@ -19,7 +19,7 @@ def write_last_signal_dir(data):
 def fullfill(symbols):
     data = {}
     for sym in symbols:
-        data[sym] = '0'
+        data[sym] = {'last_signal':  "0", "last_time": (datetime.now() - timedelta(hours=2)).strftime('%Y-%m-%d %H:%M')}
     write_last_signal_dir(data)
 
 
