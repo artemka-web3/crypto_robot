@@ -1,7 +1,10 @@
 import pygsheets
 import pytz
 import datetime
-from config import *
+
+gc = pygsheets.authorize(service_account_file='sheets_key.json')
+ws = gc.open('Крипта стата').worksheet()
+
 
 async def add_item(ticker, price, take_profit, stop_loss, time, take_perc, stop_perc, signal_type):
     tickers = ws.get_col(1)

@@ -2,8 +2,7 @@ import ccxt
 import  pygsheets
 
 
-gc = pygsheets.authorize(service_account_file='sheets_key.json')
-ws = gc.open('Крипта стата').worksheet()
+
 
 bitget = ccxt.binance()
 
