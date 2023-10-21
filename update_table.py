@@ -6,6 +6,8 @@ from signals_json import read_json
 from combo import get_historical_data
 from datetime import datetime, timedelta
 import pygsheets
+from config import bitget
+
 
 # Define the column letters as constants
 COLS_TO_UPDATE = ["I", 'J', 'K']
@@ -24,7 +26,7 @@ async def update_analytics():
     try:
         # Open Google Sheets and get data
         print('Processing signals')
-        data = ws.get_all_values(returnas='matrix')
+        data = analytics.ws.get_all_values(returnas='matrix')
 
         # Skip the header
         header = data[0]
@@ -93,14 +95,14 @@ async def update_analytics():
 
             set_cell_colors(background_color, text_color, data, row)
 
-        ws.update_values(crange=(2, 1), values=data)
+        analytics.ws.update_values(crange=(2, 1), values=data)
     except Exception as e:
         print(e)
 
 def set_cell_colors(background_color, text_color, data, row):
     if background_color and text_color:
         for col in COLS_TO_UPDATE:
-            cell = ws.cell(f'{col}{data.index(row) + 2}')
+            cell = analytics.ws.cell(f'{col}{data.index(row) + 2}')
             cell.color = background_color
             cell.set_text_format('foregroundColor', text_color)
             cell.update()
