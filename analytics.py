@@ -33,7 +33,7 @@ async def upload_queue():
     async with aiofiles.open('analytics_queue.json', 'w', encoding='utf-8') as fp:
         await fp.write('[]')
     for i in data:
-        ws.update_row(rows_count+1, list(map(str, [i['ticker'], i['signal_type'], i['price'], i['take_profit'], i['stop_loss'], i['time'], i['take_perc'], i['stop_perc']])))
+        ws.update_row(rows_count+1, list(map(str, [i['ticker'], i['signal_type'], i['price'], i['take_profit'], i['stop_loss'], i['time'], str(i['take_perc']).replace('.', ','), str(i['stop_perc']).replace('.', ',')])))
         rows_count += 1
 
 
