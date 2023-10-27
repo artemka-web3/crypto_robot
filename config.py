@@ -1,10 +1,4 @@
 import ccxt
-import  pygsheets
-
-
-
-
-bitget = ccxt.binance()
 
 BYBIT_API_KEY = "8foHKmewIagRdKwrFu"
 BYBIT_API_SECRET = "jlamiX5GJEzcLjm58Mu6jCp7Tzi1czcmo4yO"

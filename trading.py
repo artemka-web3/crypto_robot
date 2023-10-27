@@ -1,5 +1,5 @@
 from binance import Client
-from datetime  import datetime
+from datetime import datetime
 import warnings
 import threading
 import time
@@ -7,8 +7,9 @@ from last_signal_dir_json import *
 from combo import *
 from config import *
 import requests
+import ccxt
 
-
+bitget = ccxt.binance()
 threads = []
 
 
