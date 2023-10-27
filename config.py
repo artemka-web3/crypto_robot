@@ -1,5 +1,3 @@
-import ccxt
-
 BYBIT_API_KEY = "8foHKmewIagRdKwrFu"
 BYBIT_API_SECRET = "jlamiX5GJEzcLjm58Mu6jCp7Tzi1czcmo4yO"
 BYBIT_API_NAME = "crypto_tg"
