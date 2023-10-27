@@ -4,6 +4,7 @@ import ccxt
 from combo import get_historical_data
 from datetime import datetime
 import pygsheets
+import traceback
 
 
 gc = pygsheets.authorize(service_account_file='sheets_key.json')
@@ -65,17 +66,20 @@ async def update_sheet():
         data = data[1:]
 
         # Get column indices
-        ticker_idx = 1
-        signal_type_idx = 2
-        take_profit_idx = 4
-        stop_loss_idx = 5
-        time_idx = 6
-        result_idx = 9
-        time_result_idx = 10
-        deadline_idx = 11
+        ticker_idx = 0
+        signal_type_idx = 1
+        take_profit_idx = 3
+        stop_loss_idx = 4
+        time_idx = 5
+        result_idx = 8
+        time_result_idx = 9
+        deadline_idx = 10
 
         for row in data:
             ticker = row[ticker_idx]
+            if ticker == '':
+                print('Processing signals finished')
+                break
             signal_type = row[signal_type_idx]
             take_profit = float(row[take_profit_idx])
             stop_loss = float(row[stop_loss_idx])
@@ -122,7 +126,7 @@ async def update_sheet():
 
         ws.update_values(crange=(2, 1), values=data)
     except Exception as e:
-        print(e)
+        print(traceback.format_exc())
 def set_cell_colors(background_color, data, row):
     if background_color:
         for col in COLS_TO_UPDATE:
