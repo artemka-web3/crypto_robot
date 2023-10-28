@@ -29,47 +29,59 @@ def get_historical_data(symbol, timeframe, limit, bitget):
     df.set_index('timestamp', inplace=True)
     return df
 
-def calculate_indicators(data):
-    # RSI (Relative Strength Index)
+def calculate_indicators_short(data):
+    # Stochastic Oscillator
+    stoch_k_period = 14
+    stoch_d_period = 3
+    stoch_k, stoch_d = talib.STOCH(data['high'], data['low'], data['close'], fastk_period=stoch_k_period, slowk_period=stoch_d_period)
+
+    # Relative Strength Index (RSI)
     rsi_period = 14
     rsi = talib.RSI(data['close'], timeperiod=rsi_period)
 
-    # MACD (Moving Average Convergence Divergence)
+    # Average Directional Index (ADX)
+    adx_period = 14
+    adx = talib.ADX(data['high'], data['low'], data['close'], timeperiod=adx_period)
+
+    return stoch_k, stoch_d, rsi, adx
+
+def calculate_indicators_long(data):
+    # Bollinger Bands
+    bollinger_period = 14
+    bollinger_upper, bollinger_middle, bollinger_lower = talib.BBANDS(data['close'], timeperiod=bollinger_period)
+
+    # MACD
     macd, signal, _ = talib.MACD(data['close'])
 
-    # Simple Moving Averages (SMA)
-    short_sma_period = 50
-    long_sma_period = 200
-    short_sma = talib.SMA(data['close'], timeperiod=short_sma_period)
-    long_sma = talib.SMA(data['close'], timeperiod=long_sma_period)
+    # Relative Strength Index (RSI)
+    rsi_period = 14
+    rsi = talib.RSI(data['close'], timeperiod=rsi_period)
 
-    return rsi, macd, short_sma, long_sma
+    return bollinger_upper, bollinger_middle, bollinger_lower, macd, rsi
 
 # Основная стратегия
 def combo_strategy_full(symbol, bitget):
-    rsi_threshold = 30
+    rsi_threshold = 70  # Уровень RSI для входа
+    cci_threshold = 0  # Уровень CCI для входа
     while True:
         historical_data = get_historical_data(symbol, '4h', 200, bitget)
-        rsi, macd, short_sma, long_sma = calculate_indicators(historical_data)
+        bollinger_upper, bollinger_middle, bollinger_lower, macd, rsi_long = calculate_indicators_long(historical_data)
+        stoch_k, stoch_d, rsi_short, adx = calculate_indicators_short(historical_data)
         entry_price = historical_data['close'].iloc[-1]
         data = read_json()
         last_signals = last_signal_dir_json.read_last_signal_dir()
-        if rsi.iloc[-1] < rsi_threshold and macd.iloc[-1] > 0 and short_sma.iloc[-1] > long_sma.iloc[-1]:
+        if rsi_long.iloc[-1] < rsi_threshold and macd.iloc[-1] > 0 and historical_data['close'].iloc[-1] < bollinger_lower.iloc[-1]:
             if last_signals[symbol]['last_signal'] != "buy" and entry_price > 1 and datetime.strptime(last_signals[symbol]['last_time'], "%Y-%m-%d %H:%M") < datetime.now() - timedelta(hours=1):
                 stop_loss_price = choose_stop_loss_pivot(historical_data, 'LONG')
                 take_profit_points =  predict_price(historical_data, symbol)
                 take_profit_price = take_profit_points['yhat_upper'].iloc[-1]
                 take_procent_difference = ((take_profit_price - entry_price) / entry_price) * 100
                 stop_procent_difference = ((entry_price - stop_loss_price) / stop_loss_price) * 100
-                #print(last_signals[symbol])
-                #print('', entry_price > stop_loss_price and entry_price < take_profit_price)
 
                 if entry_price > stop_loss_price and entry_price < take_profit_price and take_procent_difference > stop_procent_difference:
-                    #обновление направления
                     last_signals[symbol]['last_signal'] = 'buy'
                     last_signals[symbol]['last_time'] = datetime.now().strftime('%Y-%m-%d %H:%M')
                     last_signal_dir_json.write_last_signal_dir(last_signals)
-                    #обновление направления
                     new_signal = {
                         "stop_loss": stop_loss_price,
                         "take_profit": take_profit_price,
@@ -79,11 +91,10 @@ def combo_strategy_full(symbol, bitget):
                         "time": datetime.now().strftime("%Y-%m-%d %H:%M"),
                         'take_perc': take_procent_difference,
                         'stop_perc': stop_procent_difference
-
                     }
                     data.append(new_signal)
                     write_json(data)
-        elif rsi.iloc[-1] > 70 and macd.iloc[-1] < 0 and short_sma.iloc[-1] < long_sma.iloc[-1]:
+        elif stoch_k.iloc[-1] < stoch_d.iloc[-1] and rsi_short.iloc[-1] < rsi_threshold and adx.iloc[-1] > 25:
             if last_signals[symbol] != "sell" and entry_price > 1 and datetime.strptime(last_signals[symbol]['last_time'], "%Y-%m-%d %H:%M") < datetime.now() - timedelta(hours=1):
 
                 stop_loss_price = choose_stop_loss_pivot(historical_data, 'SHORT')

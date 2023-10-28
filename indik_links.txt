@@ -1,0 +1,264 @@
+Связка 1: CCI + MACD + EMA XXX
+import talib
+import pandas as pd
+
+def calculate_indicators(data):
+    # Commodity Channel Index (CCI)
+    cci_period = 14
+    cci = talib.CCI(data['high'], data['low'], data['close'], timeperiod=cci_period)
+
+    # MACD
+    macd, signal, _ = talib.MACD(data['close'])
+
+    # Exponential Moving Averages (EMA)
+    short_ema_period = 12
+    long_ema_period = 26
+    short_ema = talib.EMA(data['close'], timeperiod=short_ema_period)
+    long_ema = talib.EMA(data['close'], timeperiod=long_ema_period)
+
+    return cci, macd, short_ema, long_ema
+def combo_strategy_full(symbol, bitget):
+    cci_threshold = 0  # Уровень CCI для входа
+    while True:
+        historical_data = get_historical_data(symbol, '4h', 200, bitget)
+        cci, macd, short_ema, long_ema = calculate_indicators(historical_data)
+        entry_price = historical_data['close'].iloc[-1]
+
+        if cci.iloc[-1] > cci_threshold and macd.iloc[-1] < 0 and short_ema.iloc[-1] > long_ema.iloc[-1]:
+            # Вход в LONG позицию
+            # Ваш код для открытия длинной позиции здесь
+
+        elif cci.iloc[-1] < -cci_threshold and macd.iloc[-1] > 0 and short_ema.iloc[-1] < long_ema.iloc[-1]:
+            # Вход в SHORT позицию
+            # Ваш код для открытия короткой позиции здесь
+
+        time.sleep(15)
+___________________________________________________________________________________________________________
+Связка 2: Stochastic + RSI + ADX 555 SHORT
+import talib
+import pandas as pd
+
+def calculate_indicators(data):
+    # Stochastic Oscillator
+    stoch_k_period = 14
+    stoch_d_period = 3
+    stoch_k, stoch_d = talib.STOCH(data['high'], data['low'], data['close'], fastk_period=stoch_k_period, slowk_period=stoch_d_period)
+
+    # Relative Strength Index (RSI)
+    rsi_period = 14
+    rsi = talib.RSI(data['close'], timeperiod=rsi_period)
+
+    # Average Directional Index (ADX)
+    adx_period = 14
+    adx = talib.ADX(data['high'], data['low'], data['close'], timeperiod=adx_period)
+
+    return stoch_k, stoch_d, rsi, adx
+def combo_strategy_full(symbol, bitget):
+    rsi_threshold = 70  # Уровень RSI для входа
+    while True:
+        historical_data = get_historical_data(symbol, '4h', 200, bitget)
+        stoch_k, stoch_d, rsi, adx = calculate_indicators(historical_data)
+        entry_price = historical_data['close'].iloc[-1]
+
+        if stoch_k.iloc[-1] > stoch_d.iloc[-1] and rsi.iloc[-1] > rsi_threshold and adx.iloc[-1] > 25:
+            # Вход в LONG позицию
+            # Ваш код для открытия длинной позиции здесь
+
+        elif stoch_k.iloc[-1] < stoch_d.iloc[-1] and rsi.iloc[-1] < rsi_threshold and adx.iloc[-1] > 25:
+            # Вход в SHORT позицию
+            # Ваш код для открытия короткой позиции здесь
+
+        time.sleep(15)
+___________________________________________________________________________________________________________
+Связка 3: Bollinger Bands + MACD + RSI LONG
+import talib
+import pandas as pd
+
+def calculate_indicators(data):
+    # Bollinger Bands
+    bollinger_period = 14
+    bollinger_upper, bollinger_middle, bollinger_lower = talib.BBANDS(data['close'], timeperiod=bollinger_period)
+
+    # MACD
+    macd, signal, _ = talib.MACD(data['close'])
+
+    # Relative Strength Index (RSI)
+    rsi_period = 14
+    rsi = talib.RSI(data['close'], timeperiod=rsi_period)
+
+    return bollinger_upper, bollinger_middle, bollinger_lower, macd, rsi
+def combo_strategy_full(symbol, bitget):
+    rsi_threshold = 70  # Уровень RSI для входа
+    while True:
+        historical_data = get_historical_data(symbol, '4h', 200, bitget)
+        bollinger_upper, bollinger_middle, bollinger_lower, macd, rsi = calculate_indicators(historical_data)
+        entry_price = historical_data['close'].iloc[-1]
+
+        if rsi.iloc[-1] < rsi_threshold and macd.iloc[-1] > 0 and historical_data['close'].iloc[-1] < bollinger_lower.iloc[-1]:
+            # Вход в LONG позицию
+            # Ваш код для открытия длинной позиции здесь
+
+        elif rsi.iloc[-1] > rsi_threshold and macd.iloc[-1] < 0 and historical_data['close'].iloc[-1] > bollinger_upper.iloc[-1]:
+            # Вход в SHORT позицию
+            # Ваш код для открытия короткой позиции здесь
+
+        time.sleep(15)
+___________________________________________________________________________________________________________
+Связка 4: Ichimoku Cloud + MACD + EMA 0000
+import talib
+import pandas as pd
+
+def calculate_indicators(data):
+    # Ichimoku Cloud
+    tenkan_sen, kijun_sen, senkou_span_a, senkou_span_b, chikou_span = talib.ICHIMOKU(data['high'], data['low'])
+
+    # MACD
+    macd, signal, _ = talib.MACD(data['close'])
+
+    # Exponential Moving Averages (EMA)
+    short_ema_period = 12
+    long_ema_period = 26
+    short_ema = talib.EMA(data['close'], timeperiod=short_ema_period)
+    long_ema = talib.EMA(data['close'], timeperiod=long_ema_period)
+
+    return tenkan_sen, kijun_sen, senkou_span_a, senkou_span_b, chikou_span, macd, short_ema, long_ema
+def combo_strategy_full(symbol, bitget):
+    while True:
+        historical_data = get_historical_data(symbol, '4h', 200, bitget)
+        tenkan_sen, kijun_sen, senkou_span_a, senkou_span_b, chikou_span, macd, short_ema, long_ema = calculate_indicators(historical_data)
+        entry_price = historical_data['close'].iloc[-1]
+
+        if entry_price > tenkan_sen.iloc[-1] and entry_price > kijun_sen.iloc[-1] and entry_price > senkou_span_a.iloc[-1] and entry_price > senkou_span_b.iloc[-1] and macd.iloc[-1] > 0 and short_ema.iloc[-1] > long_ema.iloc[-1]:
+            # Вход в LONG позицию
+            # Ваш код для открытия длинной позиции здесь
+
+        elif entry_price < tenkan_sen.iloc[-1] and entry_price < kijun_sen.iloc[-1] and entry_price < senkou_span_a.iloc[-1] and entry_price < senkou_span_b.iloc[-1] and macd.iloc[-1] < 0 and short_ema.iloc[-1] < long_ema.iloc[-1]:
+            # Вход в SHORT позицию
+            # Ваш код для открытия короткой позиции здесь
+
+        time.sleep(15)
+___________________________________________________________________________________________________________
+Связка 5: Fibonacci Retracement + RSI + CCI LONG
+import talib
+import pandas as pd
+
+def calculate_indicators(data):
+    # Fibonacci Retracement - Здесь нужно провести анализ уровней Фибоначчи
+
+    # Relative Strength Index (RSI)
+    rsi_period = 14
+    rsi = talib.RSI(data['close'], timeperiod=rsi_period)
+
+    # Commodity Channel Index (CCI)
+    cci_period = 14
+    cci = talib.CCI(data['high'], data['low'], data['close'], timeperiod=cci_period)
+
+    return rsi, cci
+def combo_strategy_full(symbol, bitget):
+    rsi_threshold = 70  # Уровень RSI для входа
+    cci_threshold = 0  # Уровень CCI для входа
+    while True:
+        historical_data = get_historical_data(symbol, '4h', 200, bitget)
+        rsi, cci = calculate_indicators(historical_data)
+        entry_price = historical_data['close'].iloc[-1]
+
+        if rsi.iloc[-1] < rsi_threshold and cci.iloc[-1] > cci_threshold:
+            # Вход в LONG позицию
+            # Ваш код для открытия длинной позиции здесь
+
+        elif rsi.iloc[-1] > rsi_threshold and cci.iloc[-1] < -cci_threshold:
+            # Вход в SHORT позицию
+            # Ваш код для открытия короткой позиции здесь
+
+        time.sleep(15)
+___________________________________________________________________________________________________________
+macd / rsi / sma
+def calculate_indicators(data):
+    # RSI (Relative Strength Index)
+    rsi_period = 14
+    rsi = talib.RSI(data['close'], timeperiod=rsi_period)
+
+    # MACD (Moving Average Convergence Divergence)
+    macd, signal, _ = talib.MACD(data['close'])
+
+    # Simple Moving Averages (SMA)
+    short_sma_period = 50
+    long_sma_period = 200
+    short_sma = talib.SMA(data['close'], timeperiod=short_sma_period)
+    long_sma = talib.SMA(data['close'], timeperiod=long_sma_period)
+
+    return rsi, macd, short_sma, long_sma
+def combo_strategy_full(symbol, bitget):
+    rsi_threshold = 30
+    while True:
+        historical_data = get_historical_data(symbol, '4h', 200, bitget)
+        rsi, macd, short_sma, long_sma = calculate_indicators(historical_data)
+        entry_price = historical_data['close'].iloc[-1]
+        data = read_json()
+        last_signals = last_signal_dir_json.read_last_signal_dir()
+        print(symbol, rsi.iloc[-1], macd.iloc[-1], short_sma.iloc[-1], long_sma[-1])
+        print(bool(rsi.iloc[-1] < rsi_threshold and macd.iloc[-1] > 0 and short_sma.iloc[-1] > long_sma.iloc[-1]))
+        print(bool(rsi.iloc[-1] > 70 and macd.iloc[-1] < 0 and short_sma.iloc[-1] < long_sma.iloc[-1]))
+        if rsi.iloc[-1] < rsi_threshold and macd.iloc[-1] > 0 and short_sma.iloc[-1] > long_sma.iloc[-1]:
+            if last_signals[symbol]['last_signal'] != "buy" and entry_price > 1 and datetime.strptime(last_signals[symbol]['last_time'], "%Y-%m-%d %H:%M") < datetime.now() - timedelta(hours=1):
+                stop_loss_price = choose_stop_loss_pivot(historical_data, 'LONG')
+                take_profit_points =  predict_price(historical_data, symbol)
+                take_profit_price = take_profit_points['yhat_upper'].iloc[-1]
+                take_procent_difference = ((take_profit_price - entry_price) / entry_price) * 100
+                stop_procent_difference = ((entry_price - stop_loss_price) / stop_loss_price) * 100
+                #print(last_signals[symbol])
+                #print('', entry_price > stop_loss_price and entry_price < take_profit_price)
+
+                if entry_price > stop_loss_price and entry_price < take_profit_price and take_procent_difference > stop_procent_difference:
+                    #обновление направления
+                    last_signals[symbol]['last_signal'] = 'buy'
+                    last_signals[symbol]['last_time'] = datetime.now().strftime('%Y-%m-%d %H:%M')
+                    last_signal_dir_json.write_last_signal_dir(last_signals)
+                    #обновление направления
+                    new_signal = {
+                        "stop_loss": stop_loss_price,
+                        "take_profit": take_profit_price,
+                        "price": entry_price,
+                        "signal_type": "🟢 LONG",
+                        "ticker": symbol, 
+                        "time": datetime.now().strftime("%Y-%m-%d %H:%M"),
+                        'take_perc': take_procent_difference,
+                        'stop_perc': stop_procent_difference
+
+                    }
+                    data.append(new_signal)
+                    write_json(data)
+        elif rsi.iloc[-1] > 70 and macd.iloc[-1] < 0 and short_sma.iloc[-1] < long_sma.iloc[-1]:
+            if last_signals[symbol] != "sell" and entry_price > 1 and datetime.strptime(last_signals[symbol]['last_time'], "%Y-%m-%d %H:%M") < datetime.now() - timedelta(hours=1):
+
+                stop_loss_price = choose_stop_loss_pivot(historical_data, 'SHORT')
+
+                take_profit_points =  predict_price(historical_data, symbol)
+                take_profit_price = take_profit_points['yhat_lower'].iloc[-1]
+
+                take_procent_difference = ((entry_price - take_profit_price) / take_profit_price) * 100
+                stop_procent_difference = ((stop_loss_price - entry_price) / entry_price) * 100
+
+                if entry_price < stop_loss_price and entry_price > take_profit_price and take_procent_difference > stop_procent_difference:
+                    #обновление направления
+                    last_signals[symbol]['signal_type'] = 'sell'
+                    last_signals[symbol]['last_time'] = datetime.now().strftime('%Y-%m-%d %H:%M')
+
+                    last_signal_dir_json.write_last_signal_dir(last_signals)
+                    #обновление направления
+                    new_signal = {
+                        "stop_loss": stop_loss_price,
+                        "take_profit": take_profit_price,
+                        "price": entry_price,
+                        "signal_type": "🔴 SHORT",
+                        "ticker": symbol, 
+                        "time": datetime.now().strftime("%Y-%m-%d %H:%M"),
+                        'take_perc': take_procent_difference,
+                        'stop_perc': stop_procent_difference
+                    }
+                    data.append(new_signal)
+                    write_json(data)
+               
+
+        time.sleep(15)
+
